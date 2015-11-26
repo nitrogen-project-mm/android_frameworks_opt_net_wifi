@@ -1017,6 +1017,8 @@ public class WifiScanningServiceImpl extends IWifiScanner.Stub {
                     break;
                 }
             }
+            if (bestBucketIndex > mSettings.buckets.length)
+                bestBucketIndex = -1;
 
             if (mostFrequentBucketIndex < bestBucketIndex) {
                 for (ChannelSpec desiredChannelSpec : channels) {
