@@ -1926,14 +1926,13 @@ public class WifiStateMachine extends StateMachine implements WifiNative.WifiPno
                 || workSource != null)) {
             mScanWorkSource = workSource != null ? workSource : new WorkSource(callingUid);
 
-            WorkSource batteryWorkSource = mScanWorkSource;
             if (mScanWorkSource.size() == 1 && mScanWorkSource.get(0) < 0) {
                 // WiFi uses negative UIDs to mean special things. BatteryStats don't care!
-                batteryWorkSource = new WorkSource(Process.WIFI_UID);
+                mScanWorkSource = new WorkSource(Process.WIFI_UID);
             }
 
             try {
-                mBatteryStats.noteWifiScanStartedFromSource(batteryWorkSource);
+                mBatteryStats.noteWifiScanStartedFromSource(mScanWorkSource);
             } catch (RemoteException e) {
                 log(e.toString());
             }
@@ -2365,7 +2364,9 @@ public class WifiStateMachine extends StateMachine implements WifiNative.WifiPno
         if (enable) {
             mWifiConfigStore.enableAllNetworks();
         }
-        boolean ret = mWifiNative.enableBackgroundScan(enable);
+        List<WifiNative.PnoNetworkPriority> pnoList =
+                mWifiConfigStore.retrievePnoNetworkPriorityList(enable);
+        boolean ret = mWifiNative.enableBackgroundScan(enable, pnoList);
         if (ret) {
             mLegacyPnoEnabled = enable;
         } else {
